@@ -2,7 +2,7 @@
 --------------------------------------------
 How to run code
 
-1) Run Command: `make`
+1) Run Command: `make` in the directory
 2) Run Command: `./armSim`
 3) Program outputs to "output.txt"
 
