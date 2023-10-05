@@ -12,16 +12,16 @@ Result and Working Process
 
 - Simulator Class:
 
-    -Class which holds register values and flags, while providing methods to perform ARM commands
+    - Class which holds register values and flags, while providing methods to perform ARM commands
 
-    -processLine() method accepts a file stream and command arguments. Interprets opcode and calls corresponding private method
+    - processLine() method accepts a file stream and command arguments. Interprets opcode and calls corresponding private method
 
-    -add() method performs hex addition and prints directly to output file.
+    - add() method performs hex addition and prints directly to output file.
 
 
 
 - Main:
 
-    -Opens input file and reads line by line
+    - Opens input file and reads line by line
 
-    -Reads values into variables which are passed into the simulator
+    - Reads values into variables which are passed into the simulator
