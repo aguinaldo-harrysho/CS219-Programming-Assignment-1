@@ -17,7 +17,7 @@ private:
 
         uint32_t sum = r1 + r2;
 
-        if ((sum == 0x00000000) && (r1>0) && (r2>0)){
+        if (((sum < r1)||(sum<r2)) && (r1>0) && (r2>0)){
 
             overflow = true;
 

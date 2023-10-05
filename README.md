@@ -17,6 +17,7 @@ Result and Working Process
     - processLine() method accepts a file stream and command arguments. Interprets opcode and calls corresponding private method
 
     - add() method performs hex addition and prints directly to output file.
+        - Detects overflow if sum value is less than either positive operands
 
 
 
