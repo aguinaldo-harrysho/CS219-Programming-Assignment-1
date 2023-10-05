@@ -1,10 +1,10 @@
 # CS219-Programming-Assignment-1
 --------------------------------------------
-How to run code
+**How to run code
 
-1) Run Command: `make`
+1) Run Command: `make` in the directory
 2) Run Command: `./armSim`
-3) Program outputs to "output.txt"
+3) Program outputs to `output.txt`
 
 
 --------------------------------------------
@@ -26,3 +26,5 @@ Result and Working Process
     - Opens input file and reads line by line
 
     - Reads values into variables which are passed into the simulator
+
+  
