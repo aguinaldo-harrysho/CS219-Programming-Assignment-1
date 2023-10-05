@@ -1,5 +1,7 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <string>
 
 class Simulator {
 private:
@@ -23,10 +25,23 @@ private:
 
         }
 
+        std::ostringstream field1;
+        field1 << "0x" << std::hex << r1;
+
+        std::ostringstream field2;
+        field2 << "0x" << std::hex << r2 << ":";
+
+        std::ostringstream field3;
+        field3 << "0x" << std::hex << sum;
+
+
+
+        
+
         output << "ADD\t";
-        output << std::hex << std::setw(16) << std::right << "0x"+std::to_string(r1);
-        output << std::hex << std::setw(16) << std::right << "0x"+std::to_string(r2)+":";
-        output << std::hex << std::setw(16) << std::right << "0x"+std::to_string(sum);
+        output << std::setw(16) << std::right << field1.str();
+        output << std::setw(16) << std::right << field2.str();
+        output << std::setw(16) << std::right << field3.str();
         output << std::endl;
 
         output << "Overflow:\t";

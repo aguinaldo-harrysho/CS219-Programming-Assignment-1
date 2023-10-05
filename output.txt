@@ -1,15 +1,15 @@
 ADD	             0x1            0x1:             0x2
 Overflow:	No
 
-ADD	     0x178935125     0x89500330:     0x268435455
+ADD	       0xaaa5555      0x555aaaa:       0xfffffff
 Overflow:	No
 
-ADD	    0x4294967295            0x1:             0x0
+ADD	      0xffffffff            0x1:             0x0
 Overflow:	Yes
 
-ADD	          0x4660        0x34661:         0x39321
+ADD	          0x1234         0x8765:          0x9999
 Overflow:	No
 
-ADD	    0x1927256321    0x772491338:    0x2699747659
+ADD	      0x72df9901     0x2e0b484a:      0xa0eae14b
 Overflow:	No
 
