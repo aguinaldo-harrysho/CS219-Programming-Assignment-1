@@ -36,8 +36,6 @@ private:
 
 
 
-        
-
         output << "ADD\t";
         output << std::setw(16) << std::right << field1.str();
         output << std::setw(16) << std::right << field2.str();
@@ -59,6 +57,61 @@ private:
         return sum;
 
     }
+
+    void sub(uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
+
+        bool overflow = false;
+
+        u_int32_t difference = r1 - r2;
+
+
+
+    }
+
+    void asr(){
+
+
+
+    }
+
+    void lsr(){
+
+
+
+    }
+
+    void lsl(){
+
+
+
+    }
+
+    void bitwiseAnd(){
+
+
+
+    }
+
+    void bitwiseNot(){
+
+
+
+    }
+
+    void bitwiseOr(){
+
+
+
+    }
+
+    void bitwiseXor(){
+
+
+
+    }
+
+
+
 
 public:
 
