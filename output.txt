@@ -1,15 +1,40 @@
-ADD	             0x1            0x1:             0x2
-Overflow:	No
-
-ADD	       0xaaa5555      0x555aaaa:       0xfffffff
-Overflow:	No
-
-ADD	      0xffffffff            0x1:             0x0
-Overflow:	Yes
-
-ADD	          0x1234         0x8765:          0x9999
-Overflow:	No
-
-ADD	      0x72df9901     0x2e0b484a:      0xa0eae14b
-Overflow:	No
-
+ADDS           0xaaa5555      0x555aaaa:       0xfffffff
+N: 0 Z: 0
+ADD           0xffffffff            0x1:             0x0
+N: 0 Z: 0
+ADDS              0x1234         0x8765:          0x9999
+N: 0 Z: 0
+ADD           0x72df9901     0x2e0b484a:      0xa0eae14b
+N: 0 Z: 0
+ANDS           0xaaa5555      0x555aaaa:             0x0
+N: 0 Z: 1
+AND           0xffffffff            0x1:             0x1
+N: 0 Z: 1
+ANDS              0x1234         0x8765:           0x224
+N: 0 Z: 0
+AND           0x72df9901     0x2e0b484a:      0x220b0800
+N: 0 Z: 0
+ASRS           0xaaa5555            0x1:       0x5552aaa
+N: 0 Z: 0
+ASR           0xffffffff            0x2:      0x3fffffff
+N: 0 Z: 0
+ASRS              0x1234            0x3:           0x246
+N: 0 Z: 0
+ASR           0x72df9901            0x4:       0x72df990
+N: 0 Z: 0
+LSRS           0xaaa5555            0x1:       0x5552aaa
+N: 0 Z: 0
+LSR           0xffffffff            0x2:      0x3fffffff
+N: 0 Z: 0
+LSRS              0x1234            0x3:           0x246
+N: 0 Z: 0
+LSR           0x72df9901            0x4:       0x72df990
+N: 0 Z: 0
+LSL            0xaaa5555            0x1:      0x1554aaaa
+N: 0 Z: 0
+LSLS          0xffffffff            0x2:      0xfffffffc
+N: 0 Z: 0
+LSL               0x1234            0x3:          0x91a0
+N: 0 Z: 0
+LSLS          0x72df9901            0x4:      0x2df99010
+N: 0 Z: 0

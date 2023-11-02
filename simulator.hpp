@@ -8,10 +8,27 @@ private:
     
     uint32_t registers[12];
 
-    bool n;
-    bool z;
-    bool c;
-    bool v;
+    bool flagN;
+    bool flagZ;
+    bool flagC;
+    bool flagV;
+
+    void flagPrintHandler(bool setFlags, std::string cmd, uint32_t r1, uint32_t r2, uint32_t result, std::fstream& output){
+
+        if (setFlags){
+
+            flagZ = (result == 0) ? 1 : 0;
+            flagN = (result < 0) ? 1 : 0;
+
+            printToFile(cmd+"S", r1, r2, result, output);
+
+        } else {
+
+            printToFile(cmd, r1, r2, result, output);
+
+        }
+
+    }
 
     void printToFile(std::string cmd, uint32_t r1, uint32_t r2, uint32_t result, std::fstream& output){
 
@@ -25,45 +42,27 @@ private:
         std::ostringstream field3;
         field3 << "0x" << std::hex << result;
 
-        output << cmd << "\t";
+        output << std::setw(8) << std::left << cmd;
         output << std::setw(16) << std::right << field1.str();
         output << std::setw(16) << std::right << field2.str();
-        output << std::setw(16) << std::right << field3.str();
-        output << std::endl;
+        output << std::setw(16) << std::right << field3.str() << std::endl;
+        output << "N: " << flagN << " " << "Z: " << flagZ << std::endl;
 
     }
 
-    int add(uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
+    int add(bool setFlags, uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
 
         bool overflow = false;
 
-        uint32_t sum = r1 + r2;
+        uint32_t result = r1 + r2;
 
-        if (((sum < r1)||(sum<r2)) && (r1>0) && (r2>0)){
+        flagPrintHandler(setFlags, "ADD", r1, r2, result, output);
 
-            overflow = true;
-
-        }
-
-        printToFile("ADD", r1, r2, sum, output);
-
-        output << "Overflow:\t";
-
-        if (overflow){
-
-            output << "Yes\n\n";
-
-        } else {
-
-            output << "No\n\n";
-
-        }
-
-        return sum;
+        return result;
 
     }
 
-    void sub(uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
+    void sub(bool setFlags, uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
 
         bool overflow = false;
 
@@ -75,61 +74,83 @@ private:
 
         }
 
-    }
-
-    void asr(){
-
-
+        flagPrintHandler(setFlags, "ADD", r1, r2, difference, output);
 
     }
 
-    void lsr(){
+    void asr(bool setFlags, uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
 
+        uint32_t result = r1 >> r2;
 
-
-    }
-
-    void lsl(){
-
-
+        //set bit 32 to value of bit 31
+        flagPrintHandler(setFlags, "ASR", r1, r2, result, output);
 
     }
 
-    void bitwiseAnd(){
+    void lsr(bool setFlags, uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
 
+        uint32_t result = r1 >> r2;
 
-
-    }
-
-    void bitwiseNot(){
-
-
+        flagPrintHandler(setFlags, "LSR", r1, r2, result, output);
 
     }
 
-    void bitwiseOr(){
+    void asl(bool setFlags, uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
 
-
-
-    }
-
-    void bitwiseXor(){
-
-
+        uint32_t result = r1 << r2;
+        
+        flagPrintHandler(setFlags, "ASL", r1, r2, result, output);
 
     }
 
+    void lsl(bool setFlags, uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
 
+        uint32_t result = r1 << r2;
 
+        flagPrintHandler(setFlags, "LSL", r1, r2, result, output);
+
+    }
+
+    void bitwiseAnd(bool setFlags, uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
+
+        uint32_t result = r1 & r2;
+
+        flagPrintHandler(setFlags, "AND", r1, r2, result, output);
+
+    }
+
+    void bitwiseNot(bool setFlags, uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
+
+        uint32_t result = ~r1;
+        
+        flagPrintHandler(setFlags, "NOT", r1, r2, result, output);
+
+    }
+
+    void bitwiseOr(bool setFlags, uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
+
+        uint32_t result = r1 | r2;
+
+        flagPrintHandler(setFlags, "ORR", r1, r2, result, output);
+
+    }
+
+    void bitwiseXor(bool setFlags, uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
+
+        uint32_t result = r1 ^ r2;
+
+        flagPrintHandler(setFlags, "XOR", r1, r2, result, output);
+    
+    }
 
 public:
 
     Simulator(){
 
-        n = 0;
-        z = 0;
-        c = 0;
-        v = 0;
+        flagN = 0;
+        flagZ = 0;
+        flagC = 0;
+        flagV = 0;
 
     }
 
@@ -137,7 +158,83 @@ public:
 
         if (cmd == "ADD"){
 
-            add(0, a, b, output);
+            add(0, 0, a, b, output);
+
+        } else if (cmd == "ADDS"){
+
+            add(1, 0, a, b, output);
+
+        } else if (cmd == "SUB"){
+
+            sub(0, 0, a, b, output);
+
+        } else if (cmd == "SUBS"){
+
+            sub(1, 0, a, b, output);
+
+        } else if (cmd == "ASR"){  //Arithmetic Shift Right
+
+            asr(0, 0, a, b, output);
+
+        } else if (cmd == "ASRS"){
+
+            asr(1, 0, a, b, output);
+
+        } else if (cmd == "LSR"){ //Logical Shift Right
+
+            lsr(0, 0, a, b, output);
+
+        } else if (cmd == "LSRS"){
+
+            lsr(1, 0, a, b, output);
+
+        } else if (cmd == "ASL"){ //Arithmetic Shift Left
+
+            asl(0, 0, a, b, output);
+
+        } else if (cmd == "ASLS"){
+
+            asl(1, 0, a, b, output);
+
+        } else if (cmd == "LSL"){ //Logical Shift left
+
+            lsl(0, 0, a, b, output);
+
+        } else if (cmd == "LSLS"){
+
+            lsl(1, 0, a, b, output);
+
+        } else if (cmd == "AND"){ //Bitwise operations
+
+            bitwiseAnd(0, 0, a, b, output);
+
+        } else if (cmd == "ANDS"){
+
+            bitwiseAnd(1, 0, a, b, output);
+
+        } else if (cmd == "NOT"){
+
+            bitwiseNot(0, 0, a, b, output);
+
+        } else if (cmd == "NOTS"){
+
+            bitwiseNot(1, 0, a, b, output);
+
+        } else if (cmd == "ORR"){
+
+            bitwiseOr(0, 0, a, b, output);
+
+        } else if (cmd == "ORRS"){
+
+            bitwiseOr(1, 0, a, b, output);
+
+        } else if (cmd == "XOR"){
+
+            bitwiseXor(0, 0, a, b, output);
+
+        } else if (cmd == "XORS"){
+
+            bitwiseXor(1, 0, a, b, output);
 
         }
 
