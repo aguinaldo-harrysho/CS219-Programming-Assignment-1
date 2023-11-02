@@ -90,7 +90,22 @@ private:
 
     void asr(bool setFlags, uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
 
+        /*
         uint32_t result = 0;
+
+        for (int i = 0; i < r2; i++){
+
+            result = r1 >> 1;
+
+            uint32_t mask = r1 & 0x80000000; // 0x80000000 if bit 32 is 1; 0x0 if bit 32 is 0
+            
+            result = result ^ mask; // set bit 32 of result to bit 32 of r1    
+
+        }
+        */
+
+       int32_t result = 0;
+
 
         for (int i = 0; i < r2; i++){
 
