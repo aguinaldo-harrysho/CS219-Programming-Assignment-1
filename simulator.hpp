@@ -13,12 +13,23 @@ private:
     bool flagC;
     bool flagV;
 
-    void flagPrintHandler(bool setFlags, std::string cmd, uint32_t r1, uint32_t r2, uint32_t result, std::fstream& output){
+    void flagPrintHandler(bool isShiftOperation, bool setFlags, std::string cmd, uint32_t r1, uint32_t r2, uint32_t result, std::fstream& output){
 
         if (setFlags){
 
             flagZ = (result == 0) ? 1 : 0;
-            flagN = (result < 0) ? 1 : 0;
+
+            if (isShiftOperation){
+
+                uint32_t mask = 0x80000000;
+
+                flagN = ( (result&mask) == 0x80000000) ? 1 : 0;
+
+            } else {
+
+                flagN = (result < 0) ? 1 : 0;    
+
+            }
 
             printToFile(cmd+"S", r1, r2, result, output);
 
@@ -31,7 +42,6 @@ private:
     }
 
     void printToFile(std::string cmd, uint32_t r1, uint32_t r2, uint32_t result, std::fstream& output){
-
 
         std::ostringstream field1;
         field1 << "0x" << std::hex << r1;
@@ -56,7 +66,7 @@ private:
 
         uint32_t result = r1 + r2;
 
-        flagPrintHandler(setFlags, "ADD", r1, r2, result, output);
+        flagPrintHandler(0, setFlags, "ADD", r1, r2, result, output);
 
         return result;
 
@@ -74,24 +84,32 @@ private:
 
         }
 
-        flagPrintHandler(setFlags, "ADD", r1, r2, difference, output);
+        flagPrintHandler(0, setFlags, "ADD", r1, r2, difference, output);
 
     }
 
     void asr(bool setFlags, uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
 
-        uint32_t result = r1 >> r2;
+        uint32_t result = 0;
 
-        //set bit 32 to value of bit 31
-        flagPrintHandler(setFlags, "ASR", r1, r2, result, output);
+        for (int i = 0; i < r2; i++){
 
+            result = r1 >> 1;
+
+            uint32_t mask = r1 & 0x80000000; // 0x80000000 if bit 32 is 1; 0x0 if bit 32 is 0
+            
+            result = result ^ mask; // set bit 32 of result to bit 32 of r1    
+
+        }
+
+        flagPrintHandler(1, setFlags, "ASR", r1, r2, result, output);
     }
 
     void lsr(bool setFlags, uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
 
         uint32_t result = r1 >> r2;
 
-        flagPrintHandler(setFlags, "LSR", r1, r2, result, output);
+        flagPrintHandler(1, setFlags, "LSR", r1, r2, result, output);
 
     }
 
@@ -99,7 +117,7 @@ private:
 
         uint32_t result = r1 << r2;
         
-        flagPrintHandler(setFlags, "ASL", r1, r2, result, output);
+        flagPrintHandler(1, setFlags, "ASL", r1, r2, result, output);
 
     }
 
@@ -107,7 +125,7 @@ private:
 
         uint32_t result = r1 << r2;
 
-        flagPrintHandler(setFlags, "LSL", r1, r2, result, output);
+        flagPrintHandler(1, setFlags, "LSL", r1, r2, result, output);
 
     }
 
@@ -115,7 +133,7 @@ private:
 
         uint32_t result = r1 & r2;
 
-        flagPrintHandler(setFlags, "AND", r1, r2, result, output);
+        flagPrintHandler(0, setFlags, "AND", r1, r2, result, output);
 
     }
 
@@ -123,7 +141,7 @@ private:
 
         uint32_t result = ~r1;
         
-        flagPrintHandler(setFlags, "NOT", r1, r2, result, output);
+        flagPrintHandler(0, setFlags, "NOT", r1, r2, result, output);
 
     }
 
@@ -131,7 +149,7 @@ private:
 
         uint32_t result = r1 | r2;
 
-        flagPrintHandler(setFlags, "ORR", r1, r2, result, output);
+        flagPrintHandler(0, setFlags, "ORR", r1, r2, result, output);
 
     }
 
@@ -139,7 +157,7 @@ private:
 
         uint32_t result = r1 ^ r2;
 
-        flagPrintHandler(setFlags, "XOR", r1, r2, result, output);
+        flagPrintHandler(0, setFlags, "XOR", r1, r2, result, output);
     
     }
 
