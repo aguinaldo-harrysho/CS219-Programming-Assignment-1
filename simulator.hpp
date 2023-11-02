@@ -13,6 +13,26 @@ private:
     bool c;
     bool v;
 
+    void printToFile(std::string cmd, uint32_t r1, uint32_t r2, uint32_t result, std::fstream& output){
+
+
+        std::ostringstream field1;
+        field1 << "0x" << std::hex << r1;
+
+        std::ostringstream field2;
+        field2 << "0x" << std::hex << r2 << ":";
+
+        std::ostringstream field3;
+        field3 << "0x" << std::hex << result;
+
+        output << cmd << "\t";
+        output << std::setw(16) << std::right << field1.str();
+        output << std::setw(16) << std::right << field2.str();
+        output << std::setw(16) << std::right << field3.str();
+        output << std::endl;
+
+    }
+
     int add(uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
 
         bool overflow = false;
@@ -25,22 +45,7 @@ private:
 
         }
 
-        std::ostringstream field1;
-        field1 << "0x" << std::hex << r1;
-
-        std::ostringstream field2;
-        field2 << "0x" << std::hex << r2 << ":";
-
-        std::ostringstream field3;
-        field3 << "0x" << std::hex << sum;
-
-
-
-        output << "ADD\t";
-        output << std::setw(16) << std::right << field1.str();
-        output << std::setw(16) << std::right << field2.str();
-        output << std::setw(16) << std::right << field3.str();
-        output << std::endl;
+        printToFile("ADD", r1, r2, sum, output);
 
         output << "Overflow:\t";
 
@@ -64,7 +69,11 @@ private:
 
         u_int32_t difference = r1 - r2;
 
+        if ( (difference>r1)||(difference>r2)) {
 
+            overflow = true;
+
+        }
 
     }
 
