@@ -174,6 +174,9 @@ public:
 
     void processLine(std::string cmd, uint32_t a, uint32_t b, std::fstream& output){
 
+        flagN = 0;
+        flagZ = 0;
+
         if (cmd == "ADD"){
 
             add(0, 0, a, b, output);

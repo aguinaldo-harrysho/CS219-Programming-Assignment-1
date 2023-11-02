@@ -9,7 +9,7 @@ N: 0 Z: 0
 ANDS           0xaaa5555      0x555aaaa:             0x0
 N: 0 Z: 1
 AND           0xffffffff            0x1:             0x1
-N: 0 Z: 1
+N: 0 Z: 0
 ANDS              0x1234         0x8765:           0x224
 N: 0 Z: 0
 AND           0x72df9901     0x2e0b484a:      0x220b0800
@@ -35,6 +35,6 @@ N: 0 Z: 0
 LSLS          0xffffffff            0x2:      0xfffffffc
 N: 1 Z: 0
 LSL               0x1234            0x3:          0x91a0
-N: 1 Z: 0
+N: 0 Z: 0
 LSLS          0x72df9901            0x4:      0x2df99010
 N: 0 Z: 0
