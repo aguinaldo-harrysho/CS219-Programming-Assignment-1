@@ -22,7 +22,7 @@ int main(){
 
     while ( input >> cmd >> std::hex >> a >> b ){
 
-        mySimulator.processLine(cmd, a, b, output);
+        //mySimulator.processLine(cmd, a, b, output);
 
     }
 

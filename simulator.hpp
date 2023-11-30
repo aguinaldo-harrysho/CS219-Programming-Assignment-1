@@ -6,14 +6,14 @@
 class Simulator {
 private:
     
-    uint32_t registers[12];
+    uint32_t Reg[8];
 
     bool flagN;
     bool flagZ;
     bool flagC;
     bool flagV;
 
-    void flagPrintHandler(bool isShiftOperation, bool setFlags, std::string cmd, uint32_t r1, uint32_t r2, uint32_t result, std::fstream& output){
+    void flagPrintHandler(bool isShiftOperation, bool setFlags, std::string cmd, uint32_t rn, uint32_t rm, uint32_t result, std::fstream& output){
 
         if (setFlags){
 
@@ -31,23 +31,23 @@ private:
 
             }
 
-            printToFile(cmd+"S", r1, r2, result, output);
+            printToFile(cmd+"S", rn, rm, result, output);
 
         } else {
 
-            printToFile(cmd, r1, r2, result, output);
+            printToFile(cmd, rn, rm, result, output);
 
         }
 
     }
 
-    void printToFile(std::string cmd, uint32_t r1, uint32_t r2, uint32_t result, std::fstream& output){
+    void printToFile(std::string cmd, uint32_t rn, uint32_t rm, uint32_t result, std::fstream& output){
 
         std::ostringstream field1;
-        field1 << "0x" << std::hex << r1;
+        field1 << "0x" << std::hex << rn;
 
         std::ostringstream field2;
-        field2 << "0x" << std::hex << r2 << ":";
+        field2 << "0x" << std::hex << rm << ":";
 
         std::ostringstream field3;
         field3 << "0x" << std::hex << result;
@@ -60,46 +60,46 @@ private:
 
     }
 
-    int add(bool setFlags, uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
+    int add(bool setFlags, uint32_t rd, uint32_t rn, uint32_t rm, std::fstream& output){
 
         bool overflow = false;
 
-        uint32_t result = r1 + r2;
+        uint32_t result = rn + rm;
 
-        flagPrintHandler(0, setFlags, "ADD", r1, r2, result, output);
+        flagPrintHandler(0, setFlags, "ADD", rn, rm, result, output);
 
         return result;
 
     }
 
-    void sub(bool setFlags, uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
+    void sub(bool setFlags, uint32_t rd, uint32_t rn, uint32_t rm, std::fstream& output){
 
         bool overflow = false;
 
-        u_int32_t difference = r1 - r2;
+        u_int32_t difference = rn - rm;
 
-        if ( (difference>r1)||(difference>r2)) {
+        if ( (difference>rn)||(difference>rm)) {
 
             overflow = true;
 
         }
 
-        flagPrintHandler(0, setFlags, "ADD", r1, r2, difference, output);
+        flagPrintHandler(0, setFlags, "ADD", rn, rm, difference, output);
 
     }
 
-    void asr(bool setFlags, uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
+    void asr(bool setFlags, uint32_t rd, uint32_t rn, uint32_t rm, std::fstream& output){
 
         /*
         uint32_t result = 0;
 
-        for (int i = 0; i < r2; i++){
+        for (int i = 0; i < rm; i++){
 
-            result = r1 >> 1;
+            result = rn >> 1;
 
-            uint32_t mask = r1 & 0x80000000; // 0x80000000 if bit 32 is 1; 0x0 if bit 32 is 0
+            uint32_t mask = rn & 0x80000000; // 0x80000000 if bit 32 is 1; 0x0 if bit 32 is 0
             
-            result = result ^ mask; // set bit 32 of result to bit 32 of r1    
+            result = result ^ mask; // set bit 32 of result to bit 32 of rn    
 
         }
         */
@@ -107,72 +107,72 @@ private:
        int32_t result = 0;
 
 
-        for (int i = 0; i < r2; i++){
+        for (int i = 0; i < rm; i++){
 
-            result = r1 >> 1;
+            result = rn >> 1;
 
-            uint32_t mask = r1 & 0x80000000; // 0x80000000 if bit 32 is 1; 0x0 if bit 32 is 0
+            uint32_t mask = rn & 0x80000000; // 0x80000000 if bit 32 is 1; 0x0 if bit 32 is 0
             
-            result = result ^ mask; // set bit 32 of result to bit 32 of r1    
+            result = result ^ mask; // set bit 32 of result to bit 32 of rn    
 
         }
 
-        flagPrintHandler(1, setFlags, "ASR", r1, r2, result, output);
+        flagPrintHandler(1, setFlags, "ASR", rn, rm, result, output);
     }
 
-    void lsr(bool setFlags, uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
+    void lsr(bool setFlags, uint32_t rd, uint32_t rn, uint32_t rm, std::fstream& output){
 
-        uint32_t result = r1 >> r2;
+        uint32_t result = rn >> rm;
 
-        flagPrintHandler(1, setFlags, "LSR", r1, r2, result, output);
+        flagPrintHandler(1, setFlags, "LSR", rn, rm, result, output);
 
     }
 
-    void asl(bool setFlags, uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
+    void asl(bool setFlags, uint32_t rd, uint32_t rn, uint32_t rm, std::fstream& output){
 
-        uint32_t result = r1 << r2;
+        uint32_t result = rn << rm;
         
-        flagPrintHandler(1, setFlags, "ASL", r1, r2, result, output);
+        flagPrintHandler(1, setFlags, "ASL", rn, rm, result, output);
 
     }
 
-    void lsl(bool setFlags, uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
+    void lsl(bool setFlags, uint32_t rd, uint32_t rn, uint32_t rm, std::fstream& output){
 
-        uint32_t result = r1 << r2;
+        uint32_t result = rn << rm;
 
-        flagPrintHandler(1, setFlags, "LSL", r1, r2, result, output);
-
-    }
-
-    void bitwiseAnd(bool setFlags, uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
-
-        uint32_t result = r1 & r2;
-
-        flagPrintHandler(0, setFlags, "AND", r1, r2, result, output);
+        flagPrintHandler(1, setFlags, "LSL", rn, rm, result, output);
 
     }
 
-    void bitwiseNot(bool setFlags, uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
+    void bitwiseAnd(bool setFlags, uint32_t rd, uint32_t rn, uint32_t rm, std::fstream& output){
 
-        uint32_t result = ~r1;
+        uint32_t result = rn & rm;
+
+        flagPrintHandler(0, setFlags, "AND", rn, rm, result, output);
+
+    }
+
+    void bitwiseNot(bool setFlags, uint32_t rd, uint32_t rn, uint32_t rm, std::fstream& output){
+
+        uint32_t result = ~rn;
         
-        flagPrintHandler(0, setFlags, "NOT", r1, r2, result, output);
+        flagPrintHandler(0, setFlags, "NOT", rn, rm, result, output);
 
     }
 
-    void bitwiseOr(bool setFlags, uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
+    void bitwiseOr(bool setFlags, uint32_t rd, uint32_t rn, uint32_t rm, std::fstream& output){
 
-        uint32_t result = r1 | r2;
+        uint32_t result = rn | rm;
 
-        flagPrintHandler(0, setFlags, "ORR", r1, r2, result, output);
+        flagPrintHandler(0, setFlags, "ORR", rn, rm, result, output);
 
     }
 
-    void bitwiseXor(bool setFlags, uint32_t rd, uint32_t r1, uint32_t r2, std::fstream& output){
+    void bitwiseXor(bool setFlags, uint32_t rd, uint32_t rn, uint32_t rm, std::fstream& output){
 
-        uint32_t result = r1 ^ r2;
+        uint32_t result = rn ^ rm;
 
-        flagPrintHandler(0, setFlags, "XOR", r1, r2, result, output);
+        flagPrintHandler(0, setFlags, "XOR", rn, rm, result, output);
     
     }
 
