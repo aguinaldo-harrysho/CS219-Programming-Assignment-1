@@ -6,14 +6,15 @@
 class Simulator {
 private:
     
-    uint32_t Reg[8];
+    uint32_t r[8]; //registers
 
     bool flagN;
     bool flagZ;
     bool flagC;
     bool flagV;
 
-    void flagPrintHandler(bool isShiftOperation, bool setFlags, std::string cmd, uint32_t rn, uint32_t rm, uint32_t result, std::fstream& output){
+    /*
+    void flagPrintHandler(bool isShiftOperation, bool setFlags, std::string cmd, uint32_t rn, uint32_t rm, uint32_t result){
 
         if (setFlags){
 
@@ -31,64 +32,55 @@ private:
 
             }
 
-            printToFile(cmd+"S", rn, rm, result, output);
+            printToFile(cmd+"S", rn, rm, result);
 
         } else {
 
-            printToFile(cmd, rn, rm, result, output);
+            printToFile(cmd, rn, rm, result);
 
         }
 
     }
+*/
+    void setNZ(int d){
 
-    void printToFile(std::string cmd, uint32_t rn, uint32_t rm, uint32_t result, std::fstream& output){
-
-        std::ostringstream field1;
-        field1 << "0x" << std::hex << rn;
-
-        std::ostringstream field2;
-        field2 << "0x" << std::hex << rm << ":";
-
-        std::ostringstream field3;
-        field3 << "0x" << std::hex << result;
-
-        output << std::setw(8) << std::left << cmd;
-        output << std::setw(16) << std::right << field1.str();
-        output << std::setw(16) << std::right << field2.str();
-        output << std::setw(16) << std::right << field3.str() << std::endl;
-        output << "N: " << flagN << " " << "Z: " << flagZ << std::endl;
+        uint32_t mask = 0x80000000;
+        flagN = ( (r[d]&mask) == 0x80000000) ? 1 : 0;
+        flagZ = ( r[d] == 0x0) ? 1 : 0;
 
     }
 
-    int add(bool setFlags, uint32_t rd, uint32_t rn, uint32_t rm, std::fstream& output){
+    void setV(int d, int sign1, int sign2){
 
-        bool overflow = false;
 
-        uint32_t result = rn + rm;
-
-        flagPrintHandler(0, setFlags, "ADD", rn, rm, result, output);
-
-        return result;
 
     }
 
-    void sub(bool setFlags, uint32_t rd, uint32_t rn, uint32_t rm, std::fstream& output){
+    void printToFile(std::string line, std::fstream& output){
 
-        bool overflow = false;
+        output << line <<std::endl;
 
-        u_int32_t difference = rn - rm;
+        for (int i = 0; i < 8; i++){
 
-        if ( (difference>rn)||(difference>rm)) {
-
-            overflow = true;
+            output << 'R' << i << ": 0x" << std::hex << r[i] << ' ';
 
         }
+        output << std::endl;
 
-        flagPrintHandler(0, setFlags, "ADD", rn, rm, difference, output);
+        output << "N: " << flagN << ' ';
+        output << "Z: " << flagZ << ' ';
+        output << "C: " << flagC << ' ';
+        output << "V: " << flagV << std::endl;
 
     }
 
-    void asr(bool setFlags, uint32_t rd, uint32_t rn, uint32_t rm, std::fstream& output){
+    void mov(int d, uint32_t imm){
+
+        r[d] = imm;
+
+    }
+
+    void asr(bool setFlags, int d, int n, int m){
 
         /*
         uint32_t result = 0;
@@ -104,75 +96,199 @@ private:
         }
         */
 
-       int32_t result = 0;
 
+        for (int i = 0; i < m; i++){
 
-        for (int i = 0; i < rm; i++){
+            r[d] = r[n] >> 1;
 
-            result = rn >> 1;
-
-            uint32_t mask = rn & 0x80000000; // 0x80000000 if bit 32 is 1; 0x0 if bit 32 is 0
+            uint32_t mask = r[n] & 0x80000000; // 0x80000000 if bit 32 is 1; 0x0 if bit 32 is 0
             
-            result = result ^ mask; // set bit 32 of result to bit 32 of rn    
+            r[d] = r[d] ^ mask; // set bit 32 of result to bit 32 of rn    
 
         }
 
-        flagPrintHandler(1, setFlags, "ASR", rn, rm, result, output);
-    }
+        if (setFlags){
 
-    void lsr(bool setFlags, uint32_t rd, uint32_t rn, uint32_t rm, std::fstream& output){
+            setNZ(d);
 
-        uint32_t result = rn >> rm;
+        }
 
-        flagPrintHandler(1, setFlags, "LSR", rn, rm, result, output);
 
     }
 
-    void asl(bool setFlags, uint32_t rd, uint32_t rn, uint32_t rm, std::fstream& output){
+    void lsr(bool setFlags, int d, int n, int m){
 
-        uint32_t result = rn << rm;
+        r[d] = r[n] >> m;
+
+        if (setFlags){
+
+            setNZ(d);
+
+        }
+
+
+    }
+
+    void asl(bool setFlags, int d, int n, int m){
+
+        bool carry = 0;
+
+        uint32_t mask = r[n] & 0x80000000;
+
+        if (mask != 0){
+
+            carry = 1;
+
+        }
+
+        r[d] = r[n] << m;
+
+        if (setFlags){
+
+            setNZ(d);
+            flagC = carry;
+
+        }
+
+
+    }
+
+    void lsl(bool setFlags, int d, int n, int m){
+
+        bool carry = 0;
+
+        uint32_t mask = r[n] & 0x80000000;
+        if (mask != 0){
+
+            carry = 1;
+
+        }
+
+        r[d] = r[n] << m;
+
+        if (setFlags){
+
+            setNZ(d);
+            flagC = carry;
+
+        }
+
+
+    }
+
+    int add(bool setFlags, int d, int n, int m){
+
+        bool overflow = false;
+
+        int sum;
+    
+        sum = r[n] + r[m];
+        r[d] = sum;
+
+        uint32_t maskN32 = r[n] & 0x80000000;
+        uint32_t maskM32 = r[m] & 0x80000000;
+        uint32_t maskD32 = r[d] & 0x80000000;
+
+        if (setFlags){
+
+            setNZ(d);
+
+            if (sum >= 0x7FFFFFFF){
+
+                flagC = 1;
+
+            } else {
+
+                flagC = 0;
+
+            }
+
+            if ( (maskN32 == maskM32) && (maskD32 != maskN32)  ){
+
+                flagV = 1;
+
+            } else {
+
+                flagV = 0;
+
+            }
+
+        }
+
+        return r[d];
+
+    }
+
+    void sub(bool setFlags, bool saveValue, int d, int n, int m){
+
+        bool overflow = false;
+
+        u_int32_t difference = r[n] - r[m];
+
+        r[d] = difference;
+
+        if ( (difference>r[n])||(difference>r[m])) {
+
+            overflow = true;
+
+        }
+
+        if (setFlags){
+
+            setNZ(d);
+            flagV = overflow;
+
+        }
+
+
+    }
+
+    void bitwiseAnd(bool setFlags, bool saveValue, int d, int n, int m){
+
+        r[d] = r[n] & r[m];
+
+        if (setFlags){
+
+            setNZ(d);
+
+        }
+
+
+    }
+
+    void bitwiseNot(bool setFlags, int d, int n, int m){
+
+        r[d] = ~r[n];
+
+        if (setFlags){
+
+            setNZ(d);
+
+        }
+
+    }
+
+    void bitwiseOr(bool setFlags, int d, int n, int m){
+
+        r[d] = r[n] | r[m];
         
-        flagPrintHandler(1, setFlags, "ASL", rn, rm, result, output);
+        if (setFlags){
+
+            setNZ(d);
+
+        }
 
     }
 
-    void lsl(bool setFlags, uint32_t rd, uint32_t rn, uint32_t rm, std::fstream& output){
+    void bitwiseXor(bool setFlags, int d, int n, int m){
 
-        uint32_t result = rn << rm;
+        r[d] = r[n] ^ r[m];
 
-        flagPrintHandler(1, setFlags, "LSL", rn, rm, result, output);
+        if (setFlags){
 
-    }
+            setNZ(d);
 
-    void bitwiseAnd(bool setFlags, uint32_t rd, uint32_t rn, uint32_t rm, std::fstream& output){
-
-        uint32_t result = rn & rm;
-
-        flagPrintHandler(0, setFlags, "AND", rn, rm, result, output);
-
-    }
-
-    void bitwiseNot(bool setFlags, uint32_t rd, uint32_t rn, uint32_t rm, std::fstream& output){
-
-        uint32_t result = ~rn;
-        
-        flagPrintHandler(0, setFlags, "NOT", rn, rm, result, output);
-
-    }
-
-    void bitwiseOr(bool setFlags, uint32_t rd, uint32_t rn, uint32_t rm, std::fstream& output){
-
-        uint32_t result = rn | rm;
-
-        flagPrintHandler(0, setFlags, "ORR", rn, rm, result, output);
-
-    }
-
-    void bitwiseXor(bool setFlags, uint32_t rd, uint32_t rn, uint32_t rm, std::fstream& output){
-
-        uint32_t result = rn ^ rm;
-
-        flagPrintHandler(0, setFlags, "XOR", rn, rm, result, output);
+        }
     
     }
 
@@ -185,94 +301,133 @@ public:
         flagC = 0;
         flagV = 0;
 
+        for (int i = 0; i < 8; i++){
+
+            r[i] = 0;
+
+        }
+
     }
 
-    void processLine(std::string cmd, uint32_t a, uint32_t b, std::fstream& output){
+    void processLine(std::string line, std::fstream& output){
 
-        flagN = 0;
-        flagZ = 0;
+        std::stringstream input;
+        input << line;
 
-        if (cmd == "ADD"){
+        std::string cmd; 
+        std::string rd; 
+        std::string rn; 
+        std::string rm;
+        input >> cmd >> rd >> rn >> rm;
 
-            add(0, 0, a, b, output);
+        transform(cmd.begin(), cmd.end(), cmd.begin(), ::toupper);
 
-        } else if (cmd == "ADDS"){
+        uint32_t imm;
 
-            add(1, 0, a, b, output);
+        std::stringstream temp;
+        char c;
 
-        } else if (cmd == "SUB"){
+        temp << rn;
+        temp >> c >> c >> c >> std::hex >> imm;
 
-            sub(0, 0, a, b, output);
+        int d = rd[1] - 48;
+        int n = rn[1] - 48;
+        int m = rm[1] - 48;
 
-        } else if (cmd == "SUBS"){
+        if (cmd == "MOV"){
 
-            sub(1, 0, a, b, output);
-
+            mov(d, imm);
+        
         } else if (cmd == "ASR"){  //Arithmetic Shift Right
 
-            asr(0, 0, a, b, output);
+            asr(0, d, n, m);
 
         } else if (cmd == "ASRS"){
 
-            asr(1, 0, a, b, output);
+            asr(1, d, n, m);
 
         } else if (cmd == "LSR"){ //Logical Shift Right
 
-            lsr(0, 0, a, b, output);
+            lsr(0, d, n, m);
 
         } else if (cmd == "LSRS"){
 
-            lsr(1, 0, a, b, output);
+            lsr(1, d, n, m);
 
         } else if (cmd == "ASL"){ //Arithmetic Shift Left
 
-            asl(0, 0, a, b, output);
+            asl(0, d, n, m);
 
         } else if (cmd == "ASLS"){
 
-            asl(1, 0, a, b, output);
+            asl(1, d, n, m);
 
         } else if (cmd == "LSL"){ //Logical Shift left
 
-            lsl(0, 0, a, b, output);
+            lsl(0, d, n, m);
 
         } else if (cmd == "LSLS"){
 
-            lsl(1, 0, a, b, output);
+            lsl(1, d, n, m);
 
-        } else if (cmd == "AND"){ //Bitwise operations
+        } else if (cmd == "ADD"){
 
-            bitwiseAnd(0, 0, a, b, output);
+            add(0, d, n, m);
+
+        } else if (cmd == "ADDS"){
+
+            add(1, d, n, m);
+
+        } else if (cmd == "SUB"){
+
+            sub(0, 1, d, n, m);
+
+        } else if (cmd == "SUBS"){
+
+            sub(1, 1, d, n, m);
+
+        }else if (cmd == "AND"){ //Bitwise operations
+
+            bitwiseAnd(0, 1, d, n, m);
 
         } else if (cmd == "ANDS"){
 
-            bitwiseAnd(1, 0, a, b, output);
+            bitwiseAnd(1, 1, d, n, m);
 
         } else if (cmd == "NOT"){
 
-            bitwiseNot(0, 0, a, b, output);
+            bitwiseNot(0, d, n, m);
 
         } else if (cmd == "NOTS"){
 
-            bitwiseNot(1, 0, a, b, output);
+            bitwiseNot(1, d, n, m);
 
         } else if (cmd == "ORR"){
 
-            bitwiseOr(0, 0, a, b, output);
+            bitwiseOr(0, d, n, m);
 
         } else if (cmd == "ORRS"){
 
-            bitwiseOr(1, 0, a, b, output);
+            bitwiseOr(1, d, n, m);
 
         } else if (cmd == "XOR"){
 
-            bitwiseXor(0, 0, a, b, output);
+            bitwiseXor(0, d, n, m);
 
         } else if (cmd == "XORS"){
 
-            bitwiseXor(1, 0, a, b, output);
+            bitwiseXor(1, d, n, m);
+
+        } else if (cmd == "CMP"){
+
+            sub(1, 0, d, n, m);
+
+        } else if (cmd == "TST"){
+
+            bitwiseAnd(1, 0, d, n, m);
 
         }
+        printToFile(line, output);
 
     }
 

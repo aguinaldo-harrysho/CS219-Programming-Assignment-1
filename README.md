@@ -13,20 +13,18 @@ Result and Working Process
 
 - Class which holds register values and flags, while providing methods to perform ARM commands
 
-- `processLine()` accepts a file stream and command arguments. **Resets N, Z flags** and then interprets command. Then, calls corresponding opcode method
+- `printToFile()` reprints the line processed, then prints all register and flag values
 
-- `flagPrintHandler()` is called by opcode methods to set the N, Z flags based on the value of the result, if the command sets flags
-    - Z is set if result is 0
-    - N is set if result is less than 0
-    - For bit shift operations, N is set if the 32nd bit is 1; otherwise, N is 0.
+### OPCODE methods
 
-- `printToFile()` method is called by the flagPrintHandler() to print command, operands, result and N, Z flag values
-
-- OPCODE methods
     - `add()` adds with arithmetic operator +
+        - Carry : if the non-truncated sum is greater than 0x7FFFFFFF
+        - Overflow : mask values with 0x80000000 to get 32nd bit value. see if the sign bit of the result is different from those of the operands, if the operands' sign bits are the same 
     - `sub()` subtracts with arithmetic operator -
         - may be changed in the future to perform subtraction using two's complement to provide flexibility in handling signed nums
+        - Overflow : if the result is greater than either operand
     - Bit Shift Operations
+        - Carry : if shifting left and the operand has bit 32 set before the operation
         - Arithmetic Shift
             - Right: shifts the result one bit at a time until finished. Each sub-shift sets the 32nd bit based on the first operand
             - Left: uses operator `<<` for bit shift. Undefined bits are made 0.

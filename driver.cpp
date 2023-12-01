@@ -9,20 +9,18 @@ int main(){
     std::fstream input;
     std::fstream output;
 
-    std::string cmd;
-    uint32_t a;
-    uint32_t b;
-
-    Simulator mySimulator;
-
     input.open ("input.txt", std::fstream::in);
     output.open ("output.txt", std::fstream::out);
 
+    std::string line;
+
+    Simulator mySimulator;
+
     std::cout << "Begin Program" << "\n";
 
-    while ( input >> cmd >> std::hex >> a >> b ){
+    while ( std::getline(input, line)){
 
-        //mySimulator.processLine(cmd, a, b, output);
+        mySimulator.processLine(line, output);
 
     }
 
